@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}Admin Dashboard — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Placement Office Dashboard</h1><p class="text-muted-sm">Overview of the entire internship placement process.</p></div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Total Students</div><div class="stat-value">{{ total_students }}</div></div>
+      <div class="stat-icon stat-icon-navy"><i class="fa-solid fa-user-graduate"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Registered Companies</div><div class="stat-value">{{ total_companies }}</div></div>
+      <div class="stat-icon stat-icon-blue"><i class="fa-solid fa-building"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Active Internships</div><div class="stat-value">{{ active_internships }}</div></div>
+      <div class="stat-icon stat-icon-green"><i class="fa-solid fa-briefcase"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Total Applications</div><div class="stat-value">{{ total_applications }}</div></div>
+      <div class="stat-icon stat-icon-amber"><i class="fa-solid fa-file-lines"></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-4">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Selected Students</div><div class="stat-value">{{ selected_students }}</div></div>
+      <div class="stat-icon stat-icon-green"><i class="fa-solid fa-circle-check"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-4">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Placement %</div><div class="stat-value">{{ placement_percentage }}%</div></div>
+      <div class="stat-icon stat-icon-navy"><i class="fa-solid fa-chart-pie"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-4">
+    <a href="{{ url_for('admin.companies', status='pending') }}" class="card-surface stat-card d-flex justify-content-between align-items-start" style="color:inherit;">
+      <div><div class="stat-label">Pending Approvals</div><div class="stat-value">{{ pending_companies + pending_internships }}</div></div>
+      <div class="stat-icon stat-icon-red"><i class="fa-solid fa-hourglass-half"></i></div>
+    </a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-6">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Pending Company Approvals</h3><a href="{{ url_for('admin.companies', status='pending') }}" class="text-muted-sm">View all</a></div>
+      {% if pending_company_list %}
+        {% for c in pending_company_list %}
+        <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+          <div><div style="font-weight:500;">{{ c.company_name }}</div><div class="text-muted-sm">{{ c.created_at|time_ago }}</div></div>
+          <form method="POST" action="{{ url_for('admin.approve_company', company_id=c.id) }}">{{ csrf_field() }}<button class="btn btn-success-c btn-sm-c">Approve</button></form>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-building"></i><p class="text-muted-sm mb-0">No companies awaiting approval.</p></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Pending Internship Approvals</h3><a href="{{ url_for('admin.internships', status='pending_approval') }}" class="text-muted-sm">View all</a></div>
+      {% if pending_internship_list %}
+        {% for i in pending_internship_list %}
+        <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+          <div><div style="font-weight:500;">{{ i.title }}</div><div class="text-muted-sm">{{ i.company.company_name }} · {{ i.posted_at|time_ago }}</div></div>
+          <form method="POST" action="{{ url_for('admin.approve_internship', internship_id=i.id) }}">{{ csrf_field() }}<button class="btn btn-success-c btn-sm-c">Approve</button></form>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-briefcase"></i><p class="text-muted-sm mb-0">No internships awaiting approval.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-12">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Recent Applications</h3><a href="{{ url_for('admin.applications') }}" class="text-muted-sm">View all</a></div>
+      {% if recent_applications %}
+        {% for a in recent_applications %}
+        <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+          <div><div style="font-weight:500;">{{ a.student_profile.full_name }}</div><div class="text-muted-sm">{{ a.internship.title }} · {{ a.internship.company.company_name }}</div></div>
+          {{ pill(a.status) }}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-file-lines"></i><p class="text-muted-sm mb-0">No applications yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

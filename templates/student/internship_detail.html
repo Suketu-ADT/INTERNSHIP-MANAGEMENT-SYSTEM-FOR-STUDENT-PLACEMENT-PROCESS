@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}{{ internship.title }} — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('internship.browse') }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to internships</a>
+    <h1 class="h1 mt-1">{{ internship.title }}</h1>
+    <p class="text-muted-sm">{{ internship.company.company_name }} · {{ internship.location }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-c js-save-toggle {{ 'text-warning' if is_saved }}" data-url="{{ url_for('internship.toggle_save', internship_id=internship.id) }}">
+      <i class="fa-{{ 'solid' if is_saved else 'regular' }} fa-bookmark me-1"></i> {{ 'Saved' if is_saved else 'Save' }}
+    </button>
+    {% if already_applied %}
+      <button class="btn btn-outline-c" disabled><i class="fa-solid fa-check me-1"></i> Already Applied</button>
+    {% elif can_apply_now %}
+      <form method="POST" action="{{ url_for('application.apply', internship_id=internship.id) }}">
+        {{ csrf_field() }}
+        <button type="submit" class="btn btn-primary-c"><i class="fa-solid fa-paper-plane me-1"></i> Apply Now</button>
+      </form>
+    {% else %}
+      <button class="btn btn-outline-c" disabled title="{{ apply_reasons|join(', ') }}">Cannot Apply</button>
+    {% endif %}
+  </div>
+</div>
+
+{% if not can_apply_now and not already_applied %}
+<div class="card-surface card-pad mb-3" style="border-left:4px solid var(--color-danger);">
+  <strong>Why you can't apply:</strong>
+  <ul class="mb-0 mt-1">{% for r in apply_reasons %}<li class="text-muted-sm">{{ r }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-surface card-pad mb-3">
+      <h3 class="h4 mb-2">Description</h3>
+      <p style="white-space:pre-wrap;">{{ internship.description }}</p>
+      <h4 class="h4 mt-4 mb-2">Required Skills</h4>
+      <div class="d-flex flex-wrap gap-1">
+        {% for s in internship.skills_list() %}<span class="pill pill-blue">{{ s }}</span>{% endfor %}
+      </div>
+    </div>
+
+    {% if not already_applied %}
+    <div class="card-surface card-pad">
+      <h3 class="h4 mb-2"><i class="fa-solid fa-wand-magic-sparkles me-1" style="color:var(--color-secondary);"></i> AI Compatibility Estimate</h3>
+      <p class="text-muted-sm">An AI-generated estimate of fit — not a prediction of selection.</p>
+      <button id="matchBtn" class="btn btn-outline-c" data-url="{{ url_for('ai.match', internship_id=internship.id) }}">Run AI Match Analysis</button>
+      <div id="matchResult" class="mt-3"></div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3">Internship Details</h4>
+      <div class="kv-row"><span class="k">Domain</span><span>{{ internship.domain }}</span></div>
+      <div class="kv-row"><span class="k">Work Mode</span><span>{{ internship.work_mode|title }}</span></div>
+      <div class="kv-row"><span class="k">Stipend</span><span>{{ '₹' + internship.stipend|string + '/mo' if internship.stipend else 'Unpaid' }}</span></div>
+      <div class="kv-row"><span class="k">Duration</span><span>{{ internship.duration_weeks }} weeks</span></div>
+      <div class="kv-row"><span class="k">Openings</span><span>{{ internship.openings }}</span></div>
+      <div class="kv-row"><span class="k">Deadline</span><span>{{ internship.application_deadline.strftime('%d %b %Y') if internship.application_deadline }}</span></div>
+      <div class="kv-row"><span class="k">Posted</span><span>{{ internship.posted_at|time_ago }}</span></div>
+    </div>
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-3">Eligibility Criteria</h4>
+      {% if internship.eligibility %}
+        <div class="kv-row"><span class="k">Min. CGPA</span><span>{{ internship.eligibility.min_cgpa or 'None' }}</span></div>
+        <div class="kv-row"><span class="k">Min. 12th %</span><span>{{ internship.eligibility.min_percentage or 'None' }}</span></div>
+        <div class="kv-row"><span class="k">Branches</span><span>{{ internship.eligibility.eligible_branches or 'All branches' }}</span></div>
+        <div class="kv-row"><span class="k">Min. Year</span><span>{{ (internship.eligibility.min_year ~ ' Year') if internship.eligibility.min_year else 'Any year' }}</span></div>
+      {% endif %}
+      <div class="mt-2">
+        {% if eligible %}
+          <span class="pill pill-green"><i class="fa-solid fa-check"></i> You meet the eligibility criteria</span>
+        {% else %}
+          <span class="pill pill-red"><i class="fa-solid fa-xmark"></i> Not eligible</span>
+          <ul class="mt-2 mb-0">{% for r in reasons %}<li class="text-muted-sm">{{ r }}</li>{% endfor %}</ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('matchBtn')?.addEventListener('click', function () {
+  var btn = this;
+  var resultBox = document.getElementById('matchResult');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
+  fetch(btn.getAttribute('data-url'), { method: 'POST', headers: { 'X-CSRFToken': window.CSRF_TOKEN || '' } })
+    .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+    .then(function (r) {
+      btn.disabled = false;
+      btn.innerHTML = 'Run AI Match Analysis';
+      if (r.status !== 200) {
+        resultBox.innerHTML = '<div class="pill pill-amber">' + (r.data.error || 'Could not complete analysis.') + '</div>';
+        return;
+      }
+      var d = r.data;
+      var html = '<div class="d-flex align-items-center gap-3 mb-2">' +
+        '<div style="font-size:28px; font-weight:700; color:var(--color-secondary);">' + d.match_score + '%</div>' +
+        '<div class="text-muted-sm">AI compatibility estimate</div></div>' +
+        '<p class="text-muted-sm">' + d.explanation + '</p>';
+      if (d.score_breakdown) {
+        html += '<div class="d-flex flex-wrap gap-3 mb-2" style="font-size:12px;">' +
+          '<span class="text-muted-sm">Skill overlap: <strong>' + d.score_breakdown.skill_overlap_percent + '%</strong></span>' +
+          '<span class="text-muted-sm">Resume keyword match: <strong>' + d.score_breakdown.resume_similarity_percent + '%</strong></span>' +
+          '<span class="text-muted-sm">AI semantic fit: <strong>' + d.score_breakdown.semantic_fit_score + '%</strong></span>' +
+          '</div>';
+      }
+      if (d.matching_skills && d.matching_skills.length) {
+        html += '<div class="mb-2"><strong class="text-muted-sm">Matching:</strong> ';
+        d.matching_skills.forEach(function (s) { html += '<span class="pill pill-green me-1">' + s + '</span>'; });
+        html += '</div>';
+      }
+      if (d.missing_skills && d.missing_skills.length) {
+        html += '<div class="mb-2"><strong class="text-muted-sm">Missing:</strong> ';
+        d.missing_skills.forEach(function (s) { html += '<span class="pill pill-red me-1">' + s + '</span>'; });
+        html += '</div>';
+      }
+      resultBox.innerHTML = html;
+    });
+});
+</script>
+{% endblock %}

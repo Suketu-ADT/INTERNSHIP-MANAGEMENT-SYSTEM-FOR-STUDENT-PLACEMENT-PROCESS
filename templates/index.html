@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}Internship Management System{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+{% block guest_content %}
+<div class="landing">
+
+  <nav class="landing-nav">
+    <div class="landing-nav-inner" id="landingNavInner">
+      <a href="#" class="landing-brand"><i class="fa-solid fa-graduation-cap"></i><span>IMS Portal</span></a>
+      <div class="landing-nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#internships">Internships</a>
+        <a href="#companies">Companies</a>
+        <a href="#ai-features">AI Features</a>
+      </div>
+      <div class="landing-nav-actions">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-c btn-sm-c">Log In</a>
+        <a href="{{ url_for('auth.register_student') }}" class="btn btn-primary-c btn-sm-c">Get Started</a>
+        <button class="landing-nav-toggle" id="landingNavToggle" type="button" aria-label="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="landing-hero">
+    <div>
+      <h1>Your Career Starts With the Right Opportunity.</h1>
+      <p class="lead">Discover internships, connect with companies, track your applications and use AI-powered career guidance to prepare for your professional journey.</p>
+      <div class="landing-hero-ctas">
+        <a href="#internships" class="btn btn-primary-c px-4 py-2">Explore Internships</a>
+        <a href="{{ url_for('auth.register_student') }}" class="btn btn-outline-c px-4 py-2">Get Started</a>
+      </div>
+    </div>
+    <div class="landing-mockup">
+      <div class="landing-mockup-bar">
+        <span class="landing-mockup-dot"></span><span class="landing-mockup-dot"></span><span class="landing-mockup-dot"></span>
+      </div>
+      <div class="landing-mockup-body">
+        <div class="landing-mockup-stats">
+          <div class="landing-mockup-stat"><div class="n">12</div><div class="l">Applications</div></div>
+          <div class="landing-mockup-stat"><div class="n">4</div><div class="l">Shortlisted</div></div>
+          <div class="landing-mockup-stat"><div class="n">1</div><div class="l">Selected</div></div>
+        </div>
+        <div class="landing-mockup-row"><span>Frontend Developer Intern</span><span class="pill pill-navy">Interview</span></div>
+        <div class="landing-mockup-row"><span>Data Analyst Intern</span><span class="pill pill-amber">Shortlisted</span></div>
+        <div class="landing-mockup-row"><span>AI/ML Intern</span><span class="pill pill-blue">Under Review</span></div>
+      </div>
+    </div>
+  </section>
+  <p class="landing-mockup-caption" style="margin-top:-24px;">Illustrative preview of the student dashboard</p>
+
+  <!-- Stats -->
+  <section class="landing-section">
+    <div class="landing-stats">
+      <div class="landing-stat"><div class="n">{{ stats.students }}</div><div class="l">Registered Students</div></div>
+      <div class="landing-stat"><div class="n">{{ stats.companies }}</div><div class="l">Registered Companies</div></div>
+      <div class="landing-stat"><div class="n">{{ stats.internships }}</div><div class="l">Active Internships</div></div>
+      <div class="landing-stat"><div class="n">{{ stats.placements }}</div><div class="l">Students Placed</div></div>
+    </div>
+  </section>
+
+  <!-- Featured companies -->
+  <section class="landing-section landing-section-alt" id="companies">
+    <div class="landing-section-head">
+      <h2>Companies Hiring Interns</h2>
+      <p>A look at the organizations currently posting opportunities on the platform.</p>
+    </div>
+    {% if featured_companies %}
+    <div class="landing-companies-grid">
+      {% for c in featured_companies %}
+        <div class="landing-company-card">
+          {% if c.logo %}
+            <img src="{{ url_for('static', filename='uploads/logos/' + c.logo) }}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;" class="mb-2">
+          {% else %}
+            <div class="avatar-circle mx-auto mb-2" style="width:48px;height:48px;font-size:18px;">{{ c.company_name[:1]|upper }}</div>
+          {% endif %}
+          <div style="font-weight:600; font-size:13.5px;">{{ c.company_name }}</div>
+          <div class="text-muted-sm" style="font-size:12px;">{{ c.industry or 'General' }}</div>
+          {% if c.is_demo %}<span class="pill pill-gray mt-2" style="font-size:10px;">Demo Company</span>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fa-solid fa-building"></i><p class="text-muted-sm mb-0">No companies have been approved yet.</p></div>
+    {% endif %}
+  </section>
+
+  <!-- Featured internships -->
+  <section class="landing-section" id="internships">
+    <div class="landing-section-head">
+      <h2>Featured Internship Opportunities</h2>
+      <p>Register as a student to view full details, check your eligibility and apply.</p>
+    </div>
+    {% if featured_internships %}
+    <div class="landing-internships-grid">
+      {% for i in featured_internships %}
+        <div class="landing-internship-card">
+          <div class="text-muted-sm">{{ i.company.company_name }}{% if i.company.is_demo %} <span class="pill pill-gray" style="font-size:10px; padding:1px 6px;">Demo</span>{% endif %}</div>
+          <div style="font-weight:600; font-size:14.5px;">{{ i.title }}</div>
+          <div class="d-flex flex-wrap gap-1">
+            <span class="pill pill-blue">{{ i.work_mode|title }}</span>
+            <span class="pill pill-gray">{{ i.location }}</span>
+            {% if i.stipend %}<span class="pill pill-green">₹{{ i.stipend }}/mo</span>{% endif %}
+          </div>
+          <div class="text-muted-sm" style="font-size:12.5px;">{{ i.description[:90] }}{{ '…' if i.description|length > 90 }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{{ url_for('auth.register_student') }}" class="btn btn-outline-c px-4">Register to Apply</a>
+    </div>
+    {% else %}
+    <div class="empty-state"><i class="fa-solid fa-briefcase"></i><p class="text-muted-sm mb-0">No internships have been posted yet.</p></div>
+    {% endif %}
+  </section>
+
+  <!-- How it works -->
+  <section class="landing-section landing-section-alt" id="how-it-works">
+    <div class="landing-section-head">
+      <h2>How It Works</h2>
+      <p>From registration to placement, every step happens in one place.</p>
+    </div>
+    <div class="landing-steps">
+      <div class="landing-step">
+        <div class="step-num">1</div>
+        <h4>Create Your Profile</h4>
+        <p>Register, add your academic details, skills and resume.</p>
+      </div>
+      <div class="landing-step">
+        <div class="step-num">2</div>
+        <h4>Discover &amp; Apply</h4>
+        <p>Search and filter internships, check eligibility, and apply.</p>
+      </div>
+      <div class="landing-step">
+        <div class="step-num">3</div>
+        <h4>Prepare With AI</h4>
+        <p>Get AI resume feedback, match insights and interview guidance.</p>
+      </div>
+      <div class="landing-step">
+        <div class="step-num">4</div>
+        <h4>Track Your Progress</h4>
+        <p>Follow every status update, interview and offer in real time.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI features -->
+  <section class="landing-section" id="ai-features">
+    <div class="landing-section-head">
+      <h2>AI-Powered Career Tools</h2>
+      <p>Built on Groq, with every academic eligibility rule still decided by plain Python — never by the AI.</p>
+    </div>
+    <div class="landing-ai-grid">
+      <div class="landing-ai-card">
+        <i class="fa-solid fa-file-circle-check"></i>
+        <h4>Resume Analysis</h4>
+        <p>Get a structured, section-by-section score and improvement suggestions for your resume.</p>
+      </div>
+      <div class="landing-ai-card">
+        <i class="fa-solid fa-diagram-project"></i>
+        <h4>Smart Matching</h4>
+        <p>A compatibility estimate combining your skills, resume and an AI read of your experience.</p>
+      </div>
+      <div class="landing-ai-card">
+        <i class="fa-solid fa-star"></i>
+        <h4>Recommendations</h4>
+        <p>Internships you're already eligible for, ranked by fit to your profile.</p>
+      </div>
+      <div class="landing-ai-card">
+        <i class="fa-solid fa-comments"></i>
+        <h4>Career Assistant</h4>
+        <p>A chat assistant for resume tips, interview prep and application strategy.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="landing-section landing-section-alt">
+    <div class="landing-section-head">
+      <h2>Built for Both Sides of Placement</h2>
+    </div>
+    <div class="landing-benefits">
+      <div class="landing-benefit-card">
+        <h3>For Students</h3>
+        <ul>
+          <li><i class="fa-solid fa-check"></i> One place to search, filter and apply to internships</li>
+          <li><i class="fa-solid fa-check"></i> Instant eligibility checks before you apply</li>
+          <li><i class="fa-solid fa-check"></i> AI-assisted resume feedback and skill-gap guidance</li>
+          <li><i class="fa-solid fa-check"></i> Clear status tracking from application to offer</li>
+        </ul>
+      </div>
+      <div class="landing-benefit-card">
+        <h3>For Companies</h3>
+        <ul>
+          <li><i class="fa-solid fa-check"></i> Post internships with structured eligibility criteria</li>
+          <li><i class="fa-solid fa-check"></i> Review applicants and their submitted resumes in one view</li>
+          <li><i class="fa-solid fa-check"></i> Schedule and manage interviews with a full history</li>
+          <li><i class="fa-solid fa-check"></i> Make and track offers through to acceptance</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="landing-section">
+    <div class="landing-cta">
+      <h2>Ready to find your internship?</h2>
+      <p>Join as a student to start applying, or register your company to start hiring.</p>
+      <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <a href="{{ url_for('auth.register_student') }}" class="btn btn-primary-c px-4 py-2">Get Started as a Student</a>
+        <a href="{{ url_for('auth.register_company') }}" class="btn btn-outline-c px-4 py-2">Register Your Company</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    <div class="landing-footer-inner">
+      <div>
+        <div class="landing-footer-brand"><i class="fa-solid fa-graduation-cap"></i><span>IMS Portal</span></div>
+        <p style="font-size:13px;">Centralizing internship opportunities, applications and placements for students, companies and the placement office.</p>
+      </div>
+      <div>
+        <h5>Platform</h5>
+        <ul>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="#internships">Internships</a></li>
+          <li><a href="#companies">Companies</a></li>
+          <li><a href="#ai-features">AI Features</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Students</h5>
+        <ul>
+          <li><a href="{{ url_for('auth.register_student') }}">Register</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Companies</h5>
+        <ul>
+          <li><a href="{{ url_for('auth.register_company') }}">Register</a></li>
+          <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="landing-footer-bottom">
+      &copy; {{ current_year }} Internship Management System — a college placement project.
+    </div>
+  </footer>
+</div>
+{% endblock %}

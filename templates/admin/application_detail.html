@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% block title %}Application — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('admin.applications') }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to applications</a>
+    <h1 class="h1 mt-1">{{ application.student_profile.full_name }}</h1>
+    <p class="text-muted-sm">{{ application.internship.title }} at {{ application.internship.company.company_name }}</p>
+  </div>
+  {{ pill(application.status) }}
+</div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Status History</h3></div>
+      <div class="card-pad">
+        {% for h in history %}
+        <div class="d-flex gap-3 mb-3">
+          <div class="stat-icon stat-icon-blue" style="width:30px;height:30px;flex-shrink:0;"><i class="fa-solid fa-circle-dot" style="font-size:10px;"></i></div>
+          <div>{{ pill(h.status) }}<div class="text-muted-sm mt-1">{{ h.changed_at.strftime('%d %b %Y, %I:%M %p') }} · by {{ h.changed_by|title }}</div>
+            {% if h.notes %}<div class="text-muted-sm mt-1">{{ h.notes }}</div>{% endif %}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3">Student</h4>
+      <div class="kv-row"><span class="k">Branch</span><span>{{ application.student_profile.branch }}</span></div>
+      <div class="kv-row"><span class="k">CGPA</span><span>{{ application.student_profile.academic_details.cgpa if application.student_profile.academic_details else '—' }}</span></div>
+      {% if application.resume %}
+      <a href="{{ url_for('application.download_resume', resume_id=application.resume.id) }}" target="_blank" class="btn btn-outline-c w-100 mt-2"><i class="fa-solid fa-file-pdf me-1"></i> View Resume</a>
+      {% endif %}
+      <a href="{{ url_for('admin.view_student', profile_id=application.student_profile.id) }}" class="btn btn-outline-c w-100 mt-2">View Full Profile</a>
+    </div>
+    {% if has_next_statuses %}
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-3">Update Status</h4>
+      <form method="POST" action="{{ url_for('application.update_status', application_id=application.id) }}">
+        {{ status_form.hidden_tag() }}
+        <div class="mb-3">{{ status_form.status(class="form-select") }}</div>
+        <div class="mb-3">{{ status_form.notes(class="form-control", placeholder="Optional notes") }}</div>
+        <button type="submit" class="btn btn-primary-c w-100">Update Status</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-2">Status</h4>
+      <p class="text-muted-sm mb-0">This application is in a final state and can no longer be updated.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

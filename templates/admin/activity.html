@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% block title %}System Activity — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">System Activity</h1><p class="text-muted-sm">Recent application status changes across the platform.</p></div>
+</div>
+<div class="card-surface">
+  {% if events %}
+    {% for e in events %}
+    <div class="d-flex align-items-start gap-3 card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+      <div class="stat-icon stat-icon-blue" style="width:34px;height:34px;flex-shrink:0;"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div class="flex-grow-1">
+        <div style="font-size:13.5px;">
+          <strong>{{ e.application.student_profile.full_name }}</strong> — {{ e.application.internship.title }} marked {{ pill(e.status) }}
+        </div>
+        <div class="text-muted-sm mt-1">{{ e.changed_at|time_ago }} · by {{ e.changed_by|title }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state"><i class="fa-solid fa-list-check"></i><h4 class="h4">No activity yet</h4></div>
+  {% endif %}
+</div>
+{% endblock %}

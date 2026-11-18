@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}{{ profile.full_name }} — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('admin.students') }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to students</a>
+    <h1 class="h1 mt-1">{{ profile.full_name }}</h1>
+    <p class="text-muted-sm">{{ profile.user.email }} · {{ profile.branch }}</p>
+  </div>
+  <form method="POST" action="{{ url_for('admin.toggle_student_active', profile_id=profile.id) }}">
+    {{ csrf_field() }}
+    <button class="btn {{ 'btn-outline-c' if profile.user.is_active_account else 'btn-success-c' }}">
+      {{ 'Deactivate Account' if profile.user.is_active_account else 'Activate Account' }}
+    </button>
+  </form>
+</div>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3">Academics</h4>
+      {% if profile.academic_details %}
+        <div class="kv-row"><span class="k">Degree</span><span>{{ profile.academic_details.degree }}</span></div>
+        <div class="kv-row"><span class="k">CGPA</span><span>{{ profile.academic_details.cgpa }}</span></div>
+        <div class="kv-row"><span class="k">12th %</span><span>{{ profile.academic_details.percentage_12 }}</span></div>
+      {% else %}<p class="text-muted-sm">No academic details.</p>{% endif %}
+    </div>
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3">Skills</h4>
+      <div class="d-flex flex-wrap gap-1">{% for s in profile.skills %}<span class="pill pill-blue">{{ s.skill_name }}</span>{% endfor %}</div>
+    </div>
+    {% set active_resume = profile.active_resume() %}
+    {% if active_resume %}
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-3">Resume</h4>
+      <a href="{{ url_for('application.download_resume', resume_id=active_resume.id) }}" target="_blank" class="btn btn-outline-c w-100">
+        <i class="fa-solid fa-file-pdf me-1"></i> {{ active_resume.original_filename }}
+      </a>
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-lg-8">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Applications</h3></div>
+      {% if profile.applications.count() %}
+      <div class="table-responsive-wrap">
+      <table class="table-clean">
+        <thead><tr><th>Internship</th><th>Company</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for a in profile.applications %}
+          <tr><td>{{ a.internship.title }}</td><td>{{ a.internship.company.company_name }}</td><td>{{ pill(a.status) }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <div class="empty-state"><i class="fa-solid fa-file-lines"></i><p class="text-muted-sm mb-0">No applications yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

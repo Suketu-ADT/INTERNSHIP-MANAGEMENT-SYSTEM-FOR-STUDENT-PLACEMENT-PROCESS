@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% block title %}Review Application — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('company.internship_applications', internship_id=application.internship.id) }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to applicants</a>
+    <h1 class="h1 mt-1">{{ application.student_profile.full_name }}</h1>
+    <p class="text-muted-sm">Applied for {{ application.internship.title }}</p>
+  </div>
+  {{ pill(application.status) }}
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-surface card-pad mb-3">
+      <h3 class="h4 mb-3">Candidate Profile</h3>
+      <div class="kv-row"><span class="k">Branch</span><span>{{ application.student_profile.branch }}</span></div>
+      <div class="kv-row"><span class="k">CGPA</span><span>{{ application.student_profile.academic_details.cgpa if application.student_profile.academic_details else '—' }}</span></div>
+      <div class="kv-row"><span class="k">Location</span><span>{{ application.student_profile.location or '—' }}</span></div>
+      <div class="kv-row"><span class="k">Bio</span><span>{{ application.student_profile.bio or '—' }}</span></div>
+      <h4 class="h4 mt-3 mb-2">Skills</h4>
+      <div class="d-flex flex-wrap gap-1">
+        {% for s in application.student_profile.skills %}<span class="pill pill-blue">{{ s.skill_name }}</span>{% endfor %}
+      </div>
+      {% if application.resume %}
+      <h4 class="h4 mt-3 mb-2">Resume</h4>
+      <a href="{{ url_for('application.download_resume', resume_id=application.resume.id) }}" target="_blank" class="btn btn-outline-c">
+        <i class="fa-solid fa-file-pdf me-1"></i> {{ application.resume.original_filename }}
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Status History</h3></div>
+      <div class="card-pad">
+        {% for h in history %}
+        <div class="d-flex gap-3 mb-3">
+          <div class="stat-icon stat-icon-blue" style="width:30px;height:30px;flex-shrink:0;"><i class="fa-solid fa-circle-dot" style="font-size:10px;"></i></div>
+          <div>{{ pill(h.status) }}<div class="text-muted-sm mt-1">{{ h.changed_at.strftime('%d %b %Y, %I:%M %p') }} · by {{ h.changed_by|title }}</div>
+            {% if h.notes %}<div class="text-muted-sm mt-1">{{ h.notes }}</div>{% endif %}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    {% if has_next_statuses %}
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3">Update Status</h4>
+      <form method="POST" action="{{ url_for('application.update_status', application_id=application.id) }}">
+        {{ status_form.hidden_tag() }}
+        <div class="mb-3">{{ status_form.status(class="form-select") }}</div>
+        <div class="mb-3">{{ status_form.notes(class="form-control", placeholder="Optional notes") }}</div>
+        <button type="submit" class="btn btn-primary-c w-100">Update Status</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-2">Status</h4>
+      <p class="text-muted-sm mb-0">This application is in a final state and can no longer be updated.</p>
+    </div>
+    {% endif %}
+
+    {% if application.status in ['shortlisted', 'interview_scheduled'] %}
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3">Schedule Interview</h4>
+      <form method="POST" action="{{ url_for('company.schedule_interview', application_id=application.id) }}">
+        {{ interview_form.hidden_tag() }}
+        <div class="mb-3">
+          <label class="form-label">Date &amp; Time</label>
+          <input type="datetime-local" name="scheduled_at" class="form-control" required>
+        </div>
+        <div class="mb-3">{{ interview_form.mode(class="form-select") }}</div>
+        <div class="mb-3">{{ interview_form.location_or_link(class="form-control", placeholder="Meeting link or location") }}</div>
+        <div class="mb-3">{{ interview_form.notes(class="form-control", placeholder="Optional notes") }}</div>
+        <button type="submit" class="btn btn-outline-c w-100">Schedule Interview</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if application.interviews.count() %}
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-3">Scheduled Interviews</h4>
+      {% for iv in application.interviews %}
+      <div class="border-top-c {{ 'pt-3 mt-3' if not loop.first }}">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div style="font-weight:500;">{{ iv.scheduled_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+            <div class="text-muted-sm">{{ iv.mode|title }}{% if iv.location_or_link %} · {{ iv.location_or_link }}{% endif %}</div>
+          </div>
+          <span class="pill {{ 'pill-green' if iv.status=='completed' else 'pill-red' if iv.status=='cancelled' else 'pill-blue' }}">{{ iv.status|title }}</span>
+        </div>
+        {% if iv.status == 'scheduled' %}
+        <div class="d-flex gap-2 mt-2">
+          <button type="button" class="btn btn-outline-c btn-sm-c" data-bs-toggle="collapse" data-bs-target="#reschedule-{{ iv.id }}">Reschedule</button>
+          <form method="POST" action="{{ url_for('company.cancel_interview', interview_id=iv.id) }}"
+                data-confirm="Cancel this interview? The candidate will be notified." data-confirm-label="Cancel Interview" data-confirm-variant="danger">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-ghost-c btn-sm-c">Cancel</button>
+          </form>
+        </div>
+        <div class="collapse mt-2" id="reschedule-{{ iv.id }}">
+          <form method="POST" action="{{ url_for('company.reschedule_interview', interview_id=iv.id) }}" class="d-flex gap-2 flex-wrap">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="datetime-local" name="scheduled_at" class="form-control" style="max-width:220px;" required>
+            <input type="text" name="location_or_link" class="form-control" placeholder="Location / link" style="max-width:220px;" value="{{ iv.location_or_link or '' }}">
+            <button type="submit" class="btn btn-primary-c btn-sm-c">Save</button>
+          </form>
+        </div>
+        {% endif %}
+        {% if iv.history.count() > 1 %}
+        <button type="button" class="btn btn-ghost-c btn-sm-c mt-1" data-bs-toggle="collapse" data-bs-target="#ivhistory-{{ iv.id }}">
+          <i class="fa-solid fa-clock-rotate-left me-1"></i>History ({{ iv.history.count() }})
+        </button>
+        <div class="collapse mt-1" id="ivhistory-{{ iv.id }}">
+          {% for h in iv.history %}
+          <div class="text-muted-sm" style="font-size:12px; padding:2px 0;">
+            {{ h.action|title }} — {{ h.scheduled_at.strftime('%d %b %Y, %I:%M %p') }} · {{ h.changed_at|time_ago }} · by {{ h.changed_by|title }}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

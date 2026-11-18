@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/pagination.html" import render as render_pagination %}
+{% block title %}My Applications — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">My Applications</h1><p class="text-muted-sm">Track the status of every internship you've applied to.</p></div>
+</div>
+
+<div class="card-surface card-pad mb-3">
+  <form method="GET" class="d-flex gap-2 align-items-end flex-wrap">
+    <div>
+      <label class="form-label">Status</label>
+      <select name="status" class="form-select" onchange="this.form.submit()" style="min-width:200px;">
+        <option value="">All Statuses</option>
+        {% for key, label in status_labels.items() %}
+          <option value="{{ key }}" {{ 'selected' if status_filter == key }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </form>
+</div>
+
+<div class="card-surface">
+  {% if applications %}
+  <div class="table-responsive-wrap">
+  <table class="table-clean">
+    <thead><tr><th>Internship</th><th>Company</th><th>Applied</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for a in applications %}
+      <tr>
+        <td>{{ a.internship.title }}</td>
+        <td>{{ a.internship.company.company_name }}</td>
+        <td class="text-muted-sm">{{ a.applied_at.strftime('%d %b %Y') }}</td>
+        <td>{{ pill(a.status) }}</td>
+        <td><a href="{{ url_for('application.detail', application_id=a.id) }}" class="btn btn-outline-c btn-sm-c">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-file-lines"></i>
+    <h4 class="h4">No applications found</h4>
+    <p class="text-muted-sm">Start applying to internships to see them here.</p>
+    <a href="{{ url_for('internship.browse') }}" class="btn btn-primary-c mt-2">Browse Internships</a>
+  </div>
+  {% endif %}
+</div>
+{{ render_pagination(pagination, 'application.mine', status=status_filter) }}
+{% endblock %}

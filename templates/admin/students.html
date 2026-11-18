@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "partials/pagination.html" import render as render_pagination %}
+{% block title %}Students — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Students</h1><p class="text-muted-sm">{{ pagination.total }} student{{ 's' if pagination.total != 1 }} registered.</p></div>
+</div>
+<div class="card-surface card-pad mb-3">
+  <form method="GET" class="row g-2">
+    <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Search by name or email" value="{{ filters.q }}"></div>
+    <div class="col-md-3">
+      <select name="branch" class="form-select">
+        <option value="">All Branches</option>
+        {% for b in branches %}<option value="{{ b }}" {{ 'selected' if filters.branch == b }}>{{ b }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2"><button type="submit" class="btn btn-primary-c w-100">Search</button></div>
+  </form>
+</div>
+<div class="card-surface">
+  {% if profiles %}
+  <div class="table-responsive-wrap">
+  <table class="table-clean">
+    <thead><tr><th>Name</th><th>Email</th><th>Branch</th><th>CGPA</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for p in profiles %}
+      <tr>
+        <td>{{ p.full_name }}</td>
+        <td>{{ p.user.email }}</td>
+        <td>{{ p.branch }}</td>
+        <td>{{ p.academic_details.cgpa if p.academic_details else '—' }}</td>
+        <td><span class="pill {{ 'pill-green' if p.user.is_active_account else 'pill-red' }}">{{ 'Active' if p.user.is_active_account else 'Deactivated' }}</span></td>
+        <td><a href="{{ url_for('admin.view_student', profile_id=p.id) }}" class="btn btn-outline-c btn-sm-c">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-user-graduate"></i><h4 class="h4">No students found</h4></div>
+  {% endif %}
+</div>
+{{ render_pagination(pagination, 'admin.students', q=filters.q, branch=filters.branch) }}
+{% endblock %}

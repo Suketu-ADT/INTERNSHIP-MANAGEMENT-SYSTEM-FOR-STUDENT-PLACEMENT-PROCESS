@@ -1,0 +1,17 @@
+{% macro item(endpoint, icon, label) %}
+  <a href="{{ url_for(endpoint) }}" class="nav-link {% if request.endpoint == endpoint %}active{% endif %}">
+    <i class="{{ icon }}"></i><span>{{ label }}</span>
+  </a>
+{% endmacro %}
+{{ item('company.dashboard', 'fa-solid fa-gauge', 'Dashboard') }}
+{{ item('company.profile', 'fa-solid fa-building', 'Company Profile') }}
+{{ item('company.my_internships', 'fa-solid fa-briefcase', 'My Internship Posts') }}
+{{ item('company.new_internship', 'fa-solid fa-circle-plus', 'Post New Internship') }}
+{{ item('company.interviews', 'fa-solid fa-calendar-check', 'Interviews') }}
+<div class="sidebar-section-label">Account</div>
+{{ item('auth.notifications', 'fa-regular fa-bell', 'Notifications') }}
+{{ item('company.profile', 'fa-solid fa-gear', 'Settings') }}
+<form method="POST" action="{{ url_for('auth.logout') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
+</form>

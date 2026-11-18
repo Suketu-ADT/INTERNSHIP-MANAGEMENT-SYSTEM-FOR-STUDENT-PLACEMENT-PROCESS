@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "partials/form_field.html" import field %}
+{% block title %}{{ 'Edit' if mode == 'edit' else 'Post' }} Internship — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">{{ 'Edit Internship' if mode == 'edit' else 'Post New Internship' }}</h1>
+  <p class="text-muted-sm">{{ 'Changes require admin re-approval.' if mode == 'edit' else 'Your posting will be reviewed by the placement office before going live.' }}</p></div>
+</div>
+<div class="card-surface card-pad" style="max-width:760px;">
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    {{ field(form.title) }}
+    {{ field(form.description) }}
+    {{ field(form.required_skills) }}
+    <div class="row">
+      <div class="col-md-4">{{ field(form.domain) }}</div>
+      <div class="col-md-4">{{ field(form.location) }}</div>
+      <div class="col-md-4">{{ field(form.work_mode) }}</div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">{{ field(form.stipend) }}</div>
+      <div class="col-md-4">{{ field(form.duration_weeks) }}</div>
+      <div class="col-md-4">{{ field(form.openings) }}</div>
+    </div>
+    {{ field(form.application_deadline) }}
+
+    <hr class="border-top-c my-3">
+    <h4 class="h4 mb-3">Eligibility Criteria</h4>
+    <div class="row">
+      <div class="col-md-4">{{ field(form.min_cgpa) }}</div>
+      <div class="col-md-4">{{ field(form.min_percentage) }}</div>
+      <div class="col-md-4">{{ field(form.min_year) }}</div>
+    </div>
+    {{ field(form.eligible_branches) }}
+
+    <button type="submit" class="btn btn-primary-c mt-2">Save Internship</button>
+    <a href="{{ url_for('company.my_internships') }}" class="btn btn-outline-c mt-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

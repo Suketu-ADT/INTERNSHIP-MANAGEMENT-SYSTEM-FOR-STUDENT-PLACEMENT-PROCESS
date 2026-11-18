@@ -1,0 +1,9 @@
+{% macro field(f, icon=None) %}
+<div class="mb-3">
+  <label class="form-label" for="{{ f.id }}">{{ f.label.text }}</label>
+  {{ f(class="form-control" if f.type not in ["SelectField"] else "form-select") }}
+  {% if f.errors %}
+    <div class="text-danger small mt-1">{{ f.errors[0] }}</div>
+  {% endif %}
+</div>
+{% endmacro %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "partials/form_field.html" import field %}
+{% block title %}Company Registration — IMS{% endblock %}
+{% block guest_content %}
+<div class="auth-wrap">
+  <div class="auth-card" style="max-width:480px;">
+    <div class="auth-logo"><i class="fa-solid fa-graduation-cap"></i><span>IMS Portal</span></div>
+    <h2 class="h2 mb-1">Register your company</h2>
+    <p class="text-secondary2 mb-4">Your account will need admin approval before you can post internships.</p>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      {{ field(form.company_name) }}
+      {{ field(form.email) }}
+      <div class="row">
+        <div class="col-6">{{ field(form.industry) }}</div>
+        <div class="col-6">{{ field(form.website) }}</div>
+      </div>
+      {{ field(form.contact_person) }}
+      {{ field(form.password) }}
+      {{ field(form.confirm_password) }}
+      <button type="submit" class="btn btn-primary-c w-100 py-2 mt-2">Create Account</button>
+    </form>
+    <p class="text-center text-secondary2 mt-4" style="font-size:13px;">
+      Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "partials/form_field.html" import field %}
+{% block title %}Academic Details — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Academic Details</h1><p class="text-muted-sm">Used to check your eligibility for internships.</p></div>
+</div>
+<ul class="nav mb-3" style="gap:4px;">
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.profile') }}">Profile</a></li>
+  <li><a class="btn btn-primary-c btn-sm-c" href="{{ url_for('student.academic') }}">Academic Details</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.skills') }}">Skills</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.resume') }}">Resume</a></li>
+</ul>
+<div class="card-surface card-pad" style="max-width:640px;">
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="row">
+      <div class="col-md-6">{{ field(form.degree) }}</div>
+      <div class="col-md-6">{{ field(form.institution) }}</div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">{{ field(form.cgpa) }}</div>
+      <div class="col-md-4">{{ field(form.percentage_10) }}</div>
+      <div class="col-md-4">{{ field(form.percentage_12) }}</div>
+    </div>
+    {{ field(form.graduation_year) }}
+    <button type="submit" class="btn btn-primary-c">Save Academic Details</button>
+  </form>
+</div>
+{% endblock %}

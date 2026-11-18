@@ -1,0 +1,21 @@
+{% macro item(endpoint, icon, label) %}
+  <a href="{{ url_for(endpoint) }}" class="nav-link {% if request.endpoint == endpoint %}active{% endif %}">
+    <i class="{{ icon }}"></i><span>{{ label }}</span>
+  </a>
+{% endmacro %}
+{{ item('admin.dashboard', 'fa-solid fa-gauge', 'Dashboard') }}
+{{ item('admin.students', 'fa-solid fa-user-graduate', 'Students') }}
+{{ item('admin.companies', 'fa-solid fa-building', 'Companies') }}
+{{ item('admin.internships', 'fa-solid fa-briefcase', 'Internship Management') }}
+{{ item('admin.applications', 'fa-solid fa-file-lines', 'Applications') }}
+{{ item('admin.interviews', 'fa-solid fa-calendar-check', 'Interview Management') }}
+{{ item('admin.placements', 'fa-solid fa-trophy', 'Placements') }}
+{{ item('admin.reports', 'fa-solid fa-chart-column', 'Reports & Analytics') }}
+<div class="sidebar-section-label">System</div>
+{{ item('auth.notifications', 'fa-regular fa-bell', 'Notifications') }}
+{{ item('admin.activity', 'fa-solid fa-list-check', 'System Activity') }}
+{{ item('admin.demo_data', 'fa-solid fa-flask', 'Demo Data') }}
+<form method="POST" action="{{ url_for('auth.logout') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="nav-link"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></button>
+</form>

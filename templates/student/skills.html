@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "partials/form_field.html" import field %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}Skills — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Skills</h1><p class="text-muted-sm">List your technical and soft skills.</p></div>
+</div>
+<ul class="nav mb-3" style="gap:4px;">
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.profile') }}">Profile</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.academic') }}">Academic Details</a></li>
+  <li><a class="btn btn-primary-c btn-sm-c" href="{{ url_for('student.skills') }}">Skills</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.resume') }}">Resume</a></li>
+</ul>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card-surface card-pad">
+      <h3 class="h4 mb-3">Add a Skill</h3>
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        {{ field(form.skill_name) }}
+        <div class="row">
+          <div class="col-6">{{ field(form.skill_type) }}</div>
+          <div class="col-6">{{ field(form.proficiency) }}</div>
+        </div>
+        <button type="submit" class="btn btn-primary-c w-100">Add Skill</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Your Skills</h3></div>
+      {% if skills %}
+        {% for s in skills %}
+          <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+            <div>
+              <span style="font-weight:500;">{{ s.skill_name }}</span>
+              <span class="pill {{ 'pill-blue' if s.skill_type=='technical' else 'pill-navy' }} ms-2">{{ s.skill_type|title }}</span>
+              <span class="text-muted-sm ms-2">{{ s.proficiency|title }}</span>
+            </div>
+            <form method="POST" action="{{ url_for('student.delete_skill', skill_id=s.id) }}">
+              {{ csrf_field() }}
+              <button class="btn btn-ghost-c btn-sm-c" title="Remove"><i class="fa-solid fa-trash"></i></button>
+            </form>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-star"></i><p class="text-muted-sm mb-0">No skills added yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

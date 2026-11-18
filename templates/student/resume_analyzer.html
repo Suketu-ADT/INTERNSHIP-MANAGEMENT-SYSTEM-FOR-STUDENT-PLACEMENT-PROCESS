@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}Resume Analyzer — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">AI Resume Analyzer</h1><p class="text-muted-sm">Get AI-powered feedback on your resume's content and formatting.</p></div>
+  {% if resume_record %}
+  <form method="POST" data-ai-loading="Analyzing...">
+    {{ csrf_field() }}
+    <button type="submit" class="btn btn-primary-c" {{ 'disabled' if not ai_configured }}>
+      <i class="fa-solid fa-wand-magic-sparkles me-1"></i> {{ 'Re-analyze' if result else 'Analyze My Resume' }}
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+{% if not ai_configured %}
+<div class="card-surface card-pad mb-3" style="border-left:4px solid var(--color-warning);">
+  <i class="fa-solid fa-triangle-exclamation me-1" style="color:var(--color-warning);"></i>
+  AI features are not configured. Add a <code>GROQ_API_KEY</code> to your <code>.env</code> file to enable the resume analyzer.
+</div>
+{% elif resume_record %}
+<div class="card-surface card-pad mb-3" style="border-left:4px solid var(--color-secondary);">
+  <i class="fa-solid fa-shield-halved me-1" style="color:var(--color-secondary);"></i>
+  Running this analysis sends your resume's extracted text to Groq's API (a third-party AI provider) for
+  processing. It's used only to generate this analysis and is not shared with recruiters or stored by Groq
+  beyond that request.
+</div>
+{% endif %}
+
+{% if not resume_record %}
+<div class="card-surface empty-state"><i class="fa-solid fa-file-waveform"></i>
+  <h4 class="h4">No resume uploaded</h4>
+  <p class="text-muted-sm">Upload a resume first to run the AI analysis.</p>
+  <a href="{{ url_for('student.resume') }}" class="btn btn-primary-c mt-2">Upload Resume</a>
+</div>
+{% elif not result %}
+<div class="card-surface empty-state"><i class="fa-solid fa-wand-magic-sparkles"></i>
+  <h4 class="h4">No analysis yet</h4>
+  <p class="text-muted-sm">Click "Analyze My Resume" to get AI-powered feedback.</p>
+</div>
+{% else %}
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-surface card-pad mb-3">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <h3 class="h4 mb-0">Summary</h3>
+        <div class="text-center">
+          <div style="font-size:26px; font-weight:700; color:var(--color-secondary); line-height:1;">{{ result.resume_score }}<span style="font-size:14px; color:var(--color-text-secondary);">/100</span></div>
+          <div class="text-muted-sm" style="font-size:11px;">Resume Score</div>
+        </div>
+      </div>
+      <p class="text-muted-sm">{{ result.summary }}</p>
+      <div class="row g-2 mt-2" title="Content Completeness / Quantified Achievements / Skills Relevance / Formatting &amp; ATS Clarity — each scored 0-25">
+        <div class="col-6 col-md-3">
+          <div class="text-muted-sm" style="font-size:11px;">Completeness</div>
+          <div class="progress-track"><div class="progress-fill" style="width:{{ (result.score_breakdown.content_completeness / 25 * 100)|round }}%;"></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="text-muted-sm" style="font-size:11px;">Quantified Results</div>
+          <div class="progress-track"><div class="progress-fill" style="width:{{ (result.score_breakdown.quantified_achievements / 25 * 100)|round }}%;"></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="text-muted-sm" style="font-size:11px;">Skills Relevance</div>
+          <div class="progress-track"><div class="progress-fill" style="width:{{ (result.score_breakdown.skills_relevance / 25 * 100)|round }}%;"></div></div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="text-muted-sm" style="font-size:11px;">Formatting/ATS</div>
+          <div class="progress-track"><div class="progress-fill" style="width:{{ (result.score_breakdown.formatting_clarity / 25 * 100)|round }}%;"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="card-surface card-pad">
+          <h4 class="h4 mb-2"><i class="fa-solid fa-circle-check me-1" style="color:var(--color-success);"></i> Strengths</h4>
+          <ul class="mb-0">{% for s in result.strengths %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card-surface card-pad">
+          <h4 class="h4 mb-2"><i class="fa-solid fa-triangle-exclamation me-1" style="color:var(--color-warning);"></i> Weaknesses</h4>
+          <ul class="mb-0">{% for s in result.weaknesses %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+        </div>
+      </div>
+    </div>
+    <div class="card-surface card-pad mt-3">
+      <h4 class="h4 mb-2"><i class="fa-solid fa-lightbulb me-1" style="color:var(--color-secondary);"></i> Improvement Suggestions</h4>
+      <ul class="mb-0">{% for s in result.improvement_suggestions %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+    </div>
+    <div class="card-surface card-pad mt-3">
+      <h4 class="h4 mb-2"><i class="fa-solid fa-robot me-1"></i> ATS Compatibility Suggestions</h4>
+      <ul class="mb-0">{% for s in result.ats_suggestions %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+    </div>
+    <div class="card-surface card-pad mt-3">
+      <h4 class="h4 mb-2"><i class="fa-solid fa-file-lines me-1"></i> Formatting Suggestions</h4>
+      <ul class="mb-0">{% for s in result.formatting_suggestions %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-2">Technical Skills Detected</h4>
+      <div class="d-flex flex-wrap gap-1">{% for s in result.technical_skills %}<span class="pill pill-blue">{{ s }}</span>{% endfor %}</div>
+    </div>
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-2">Soft Skills Detected</h4>
+      <div class="d-flex flex-wrap gap-1">{% for s in result.soft_skills %}<span class="pill pill-navy">{{ s }}</span>{% endfor %}</div>
+    </div>
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-2">Education</h4>
+      <ul class="mb-0">{% for s in result.education %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+    </div>
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-2">Missing Information</h4>
+      <ul class="mb-0">{% for s in result.missing_information %}<li class="text-muted-sm mb-1">{{ s }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

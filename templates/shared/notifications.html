@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Notifications — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Notifications</h1><p class="text-muted-sm">Recent activity on your account.</p></div>
+</div>
+<div class="card-surface">
+  {% if notifications %}
+    {% for n in notifications %}
+      <div class="d-flex align-items-start gap-3 card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+        <div class="stat-icon stat-icon-{{ 'blue' if n.category=='application' else 'green' if n.category=='approval' else 'amber' if n.category=='interview' else 'navy' }}" style="width:34px;height:34px;flex-shrink:0;">
+          <i class="fa-solid {{ 'fa-file-lines' if n.category=='application' else 'fa-circle-check' if n.category=='approval' else 'fa-calendar-check' if n.category=='interview' else 'fa-bell' }}"></i>
+        </div>
+        <div class="flex-grow-1">
+          <div style="font-size:13.5px;">{{ n.message }}</div>
+          <div class="text-muted-sm mt-1">{{ n.created_at|time_ago }}</div>
+        </div>
+        {% if n.link %}<a href="{{ n.link }}" class="btn btn-outline-c btn-sm-c">View</a>{% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state"><i class="fa-regular fa-bell"></i>
+      <h4 class="h4">No notifications yet</h4>
+      <p class="text-muted-sm">You're all caught up.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

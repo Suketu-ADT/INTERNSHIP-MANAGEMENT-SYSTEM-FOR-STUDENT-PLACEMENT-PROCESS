@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Find Internships — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Find Internships</h1><p class="text-muted-sm">{{ total }} internship{{ 's' if total != 1 }} available.</p></div>
+</div>
+
+<div class="card-surface card-pad mb-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label">Search</label>
+      <input type="text" name="q" class="form-control" placeholder="Title or company" value="{{ filters.q }}">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Domain</label>
+      <select name="domain" class="form-select">
+        <option value="">All</option>
+        {% for d in domains %}<option value="{{ d }}" {{ 'selected' if filters.domain == d }}>{{ d }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Location</label>
+      <input type="text" name="location" class="form-control" value="{{ filters.location }}">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Work Mode</label>
+      <select name="work_mode" class="form-select">
+        <option value="">All</option>
+        <option value="remote" {{ 'selected' if filters.work_mode == 'remote' }}>Remote</option>
+        <option value="hybrid" {{ 'selected' if filters.work_mode == 'hybrid' }}>Hybrid</option>
+        <option value="onsite" {{ 'selected' if filters.work_mode == 'onsite' }}>On-site</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Min. Stipend</label>
+      <input type="number" name="min_stipend" class="form-control" value="{{ filters.min_stipend }}">
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary-c w-100"><i class="fa-solid fa-filter"></i></button>
+    </div>
+    <div class="col-12 mt-2 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <label class="d-flex align-items-center gap-2" style="font-size:13px;">
+        <input type="checkbox" name="eligible_only" value="1" {{ 'checked' if filters.eligible_only }} onchange="this.form.submit()">
+        Show only internships I'm eligible for
+      </label>
+      <label class="d-flex align-items-center gap-2" style="font-size:13px;">
+        Sort by
+        <select name="sort" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+          <option value="newest" {{ 'selected' if sort == 'newest' }}>Newest</option>
+          <option value="deadline" {{ 'selected' if sort == 'deadline' }}>Deadline (soonest)</option>
+        </select>
+      </label>
+    </div>
+  </form>
+</div>
+
+{% if internships %}
+<div class="row g-3">
+  {% for i in internships %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card-surface card-pad h-100 d-flex flex-column">
+      <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="stat-icon stat-icon-navy"><i class="fa-solid fa-building"></i></div>
+        <button class="btn btn-ghost-c btn-sm-c js-save-toggle {{ 'text-warning' if i.id in saved_ids }}" data-url="{{ url_for('internship.toggle_save', internship_id=i.id) }}">
+          <i class="fa-{{ 'solid' if i.id in saved_ids else 'regular' }} fa-bookmark"></i>
+        </button>
+      </div>
+      <a href="{{ url_for('internship.detail', internship_id=i.id) }}" style="font-weight:600; color:var(--color-text); font-size:14.5px;">{{ i.title }}</a>
+      <div class="text-muted-sm mb-2">{{ i.company.company_name }}{% if i.company.is_demo %} <span class="pill pill-gray" style="font-size:10px; padding:1px 6px;">Demo</span>{% endif %}</div>
+      <div class="d-flex flex-wrap gap-1 mb-3">
+        <span class="pill pill-blue">{{ i.work_mode|title }}</span>
+        <span class="pill pill-gray">{{ i.location }}</span>
+        {% if i.stipend %}<span class="pill pill-green">₹{{ i.stipend }}/mo</span>{% endif %}
+        {% set elig = eligibility_map.get(i.id) %}
+        {% if elig == 'not_eligible' %}<span class="pill pill-red">Not Eligible</span>
+        {% elif elig == 'missing_skills' %}<span class="pill pill-amber">Missing Skills</span>
+        {% else %}<span class="pill pill-green">Eligible</span>{% endif %}
+      </div>
+      <div class="text-muted-sm mb-3 flex-grow-1">{{ i.description[:90] }}{{ '…' if i.description|length > 90 }}</div>
+      <a href="{{ url_for('internship.detail', internship_id=i.id) }}" class="btn btn-outline-c w-100">View Details</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<nav class="d-flex justify-content-center gap-2 mt-4">
+  {% for p in range(1, total_pages + 1) %}
+    <a href="{{ url_for('internship.browse', page=p, **filters) }}"
+       class="btn btn-sm-c {{ 'btn-primary-c' if p == page else 'btn-outline-c' }}">{{ p }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="card-surface empty-state"><i class="fa-solid fa-briefcase"></i>
+  <h4 class="h4">No internships found</h4>
+  <p class="text-muted-sm">Try adjusting your filters.</p>
+</div>
+{% endif %}
+{% endblock %}

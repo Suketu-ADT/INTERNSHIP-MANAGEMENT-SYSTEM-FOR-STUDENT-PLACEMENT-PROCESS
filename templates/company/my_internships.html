@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% from "partials/pagination.html" import render as render_pagination %}
+{% block title %}My Internship Posts — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">My Internship Posts</h1><p class="text-muted-sm">Manage your internship postings.</p></div>
+  <a href="{{ url_for('company.new_internship') }}" class="btn btn-primary-c"><i class="fa-solid fa-circle-plus me-1"></i> Post New Internship</a>
+</div>
+
+<div class="card-surface card-pad mb-3">
+  <form method="GET" class="d-flex gap-2">
+    <select name="status" class="form-select" onchange="this.form.submit()" style="max-width:220px;">
+      <option value="">All Statuses</option>
+      <option value="pending_approval" {{ 'selected' if status_filter=='pending_approval' }}>Pending Approval</option>
+      <option value="approved" {{ 'selected' if status_filter=='approved' }}>Approved</option>
+      <option value="rejected" {{ 'selected' if status_filter=='rejected' }}>Rejected</option>
+      <option value="closed" {{ 'selected' if status_filter=='closed' }}>Closed</option>
+    </select>
+  </form>
+</div>
+
+<div class="card-surface">
+  {% if posts %}
+  <div class="table-responsive-wrap">
+  <table class="table-clean">
+    <thead><tr><th>Title</th><th>Domain</th><th>Applicants</th><th>Deadline</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for p in posts %}
+      <tr>
+        <td>{{ p.title }}</td>
+        <td>{{ p.domain }}</td>
+        <td>{{ p.applications.count() }}</td>
+        <td class="text-muted-sm">{{ p.application_deadline.strftime('%d %b %Y') if p.application_deadline }}{% if p.application_deadline and p.application_deadline < today %} <span class="pill pill-red ms-1">Expired</span>{% endif %}</td>
+        <td>{{ pill(p.status) }}</td>
+        <td class="d-flex gap-1">
+          <a href="{{ url_for('company.internship_applications', internship_id=p.id) }}" class="btn btn-outline-c btn-sm-c">Applicants</a>
+          <a href="{{ url_for('company.edit_internship', internship_id=p.id) }}" class="btn btn-outline-c btn-sm-c">Edit</a>
+          {% if p.status != 'closed' %}
+          <form method="POST" action="{{ url_for('company.close_internship', internship_id=p.id) }}"
+                data-confirm="Close this internship posting? Students will no longer be able to apply." data-confirm-label="Close Posting" data-confirm-variant="danger">
+            {{ csrf_field() }}
+            <button class="btn btn-ghost-c btn-sm-c"><i class="fa-solid fa-lock"></i></button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-briefcase"></i>
+    <h4 class="h4">No internships posted yet</h4>
+    <a href="{{ url_for('company.new_internship') }}" class="btn btn-primary-c mt-2">Post Your First Internship</a>
+  </div>
+  {% endif %}
+</div>
+{{ render_pagination(pagination, 'company.my_internships', status=status_filter) }}
+{% endblock %}

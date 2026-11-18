@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/pagination.html" import render as render_pagination %}
+{% block title %}Applications — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Applications</h1><p class="text-muted-sm">Monitoring all application activity across the platform.</p></div>
+</div>
+<div class="card-surface card-pad mb-3">
+  <form method="GET" class="d-flex gap-2">
+    <select name="status" class="form-select" onchange="this.form.submit()" style="max-width:220px;">
+      <option value="">All Statuses</option>
+      <option value="pending" {{ 'selected' if status_filter=='pending' }}>Pending</option>
+      <option value="under_review" {{ 'selected' if status_filter=='under_review' }}>Under Review</option>
+      <option value="shortlisted" {{ 'selected' if status_filter=='shortlisted' }}>Shortlisted</option>
+      <option value="interview_scheduled" {{ 'selected' if status_filter=='interview_scheduled' }}>Interview Scheduled</option>
+      <option value="selected" {{ 'selected' if status_filter=='selected' }}>Selected</option>
+      <option value="rejected" {{ 'selected' if status_filter=='rejected' }}>Rejected</option>
+      <option value="withdrawn" {{ 'selected' if status_filter=='withdrawn' }}>Withdrawn</option>
+    </select>
+  </form>
+</div>
+<div class="card-surface">
+  {% if applications %}
+  <div class="table-responsive-wrap">
+  <table class="table-clean">
+    <thead><tr><th>Student</th><th>Internship</th><th>Company</th><th>Applied</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for a in applications %}
+      <tr>
+        <td>{{ a.student_profile.full_name }}</td>
+        <td>{{ a.internship.title }}</td>
+        <td>{{ a.internship.company.company_name }}</td>
+        <td class="text-muted-sm">{{ a.applied_at.strftime('%d %b %Y') }}</td>
+        <td>{{ pill(a.status) }}</td>
+        <td><a href="{{ url_for('application.detail', application_id=a.id) }}" class="btn btn-outline-c btn-sm-c">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-solid fa-file-lines"></i><h4 class="h4">No applications found</h4></div>
+  {% endif %}
+</div>
+{{ render_pagination(pagination, 'admin.applications', status=status_filter) }}
+{% endblock %}

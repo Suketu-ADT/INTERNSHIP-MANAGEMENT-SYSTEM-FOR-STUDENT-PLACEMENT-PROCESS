@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}{{ company.company_name }} — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('admin.companies') }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to companies</a>
+    <h1 class="h1 mt-1">{{ company.company_name }}{% if company.is_demo %} <span class="pill pill-gray" style="font-size:11px;">Demo Company</span>{% endif %}</h1>
+    <p class="text-muted-sm">{{ company.user.email }}</p>
+  </div>
+  {% if not company.is_approved %}
+  <div class="d-flex gap-2">
+    <form method="POST" action="{{ url_for('admin.approve_company', company_id=company.id) }}">{{ csrf_field() }}<button class="btn btn-success-c">Approve</button></form>
+    <form method="POST" action="{{ url_for('admin.reject_company', company_id=company.id) }}" data-confirm="Reject this company registration?" data-confirm-label="Reject" data-confirm-variant="danger">{{ csrf_field() }}<button class="btn btn-danger-c">Reject</button></form>
+  </div>
+  {% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card-surface card-pad">
+      <div class="kv-row"><span class="k">Industry</span><span>{{ company.industry or '—' }}</span></div>
+      <div class="kv-row"><span class="k">Website</span><span>{{ company.website or '—' }}</span></div>
+      <div class="kv-row"><span class="k">Contact</span><span>{{ company.contact_person or '—' }}</span></div>
+      <div class="kv-row"><span class="k">Status</span><span class="pill {{ 'pill-green' if company.is_approved else 'pill-amber' }}">{{ 'Approved' if company.is_approved else 'Pending' }}</span></div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Internship Postings</h3></div>
+      {% if company.internships.count() %}
+      <div class="table-responsive-wrap">
+      <table class="table-clean">
+        <thead><tr><th>Title</th><th>Status</th><th>Applicants</th></tr></thead>
+        <tbody>
+          {% for i in company.internships %}
+          <tr><td>{{ i.title }}</td><td>{{ pill(i.status) }}</td><td>{{ i.applications.count() }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <div class="empty-state"><i class="fa-solid fa-briefcase"></i><p class="text-muted-sm mb-0">No postings yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

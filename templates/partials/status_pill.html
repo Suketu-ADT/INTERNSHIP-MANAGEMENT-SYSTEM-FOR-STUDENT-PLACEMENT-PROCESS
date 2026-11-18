@@ -1,0 +1,16 @@
+{% macro pill(status) %}
+  {% set map = {
+    'pending': 'pill-gray', 'under_review': 'pill-blue', 'shortlisted': 'pill-amber',
+    'interview_scheduled': 'pill-navy', 'selected': 'pill-green', 'rejected': 'pill-red',
+    'withdrawn': 'pill-gray', 'pending_approval': 'pill-amber', 'approved': 'pill-green',
+    'closed': 'pill-gray', 'rejected_post': 'pill-red',
+    'offer_accepted': 'pill-green', 'offer_declined': 'pill-gray'
+  } %}
+  {% set labels = {
+    'pending': 'Pending', 'under_review': 'Under Review', 'shortlisted': 'Shortlisted',
+    'interview_scheduled': 'Interview Scheduled', 'selected': 'Selected', 'rejected': 'Rejected',
+    'withdrawn': 'Withdrawn', 'pending_approval': 'Pending Approval', 'approved': 'Approved',
+    'closed': 'Closed', 'offer_accepted': 'Offer Accepted', 'offer_declined': 'Offer Declined'
+  } %}
+  <span class="pill {{ map.get(status, 'pill-gray') }}">{{ labels.get(status, status|replace('_',' ')|title) }}</span>
+{% endmacro %}

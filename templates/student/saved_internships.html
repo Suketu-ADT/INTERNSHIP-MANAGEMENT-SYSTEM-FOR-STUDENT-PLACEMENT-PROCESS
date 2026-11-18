@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Saved Internships — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Saved Internships</h1><p class="text-muted-sm">Internships you've bookmarked for later.</p></div>
+</div>
+{% if saved %}
+<div class="row g-3">
+  {% for s in saved %}
+  <div class="col-md-6 col-lg-4">
+    <div class="card-surface card-pad h-100 d-flex flex-column">
+      <div class="stat-icon stat-icon-navy mb-2"><i class="fa-solid fa-building"></i></div>
+      <a href="{{ url_for('internship.detail', internship_id=s.internship.id) }}" style="font-weight:600; color:var(--color-text);">{{ s.internship.title }}</a>
+      <div class="text-muted-sm mb-2">{{ s.internship.company.company_name }}</div>
+      <div class="d-flex flex-wrap gap-1 mb-3">
+        <span class="pill pill-blue">{{ s.internship.work_mode|title }}</span>
+        <span class="pill pill-gray">{{ s.internship.location }}</span>
+      </div>
+      <a href="{{ url_for('internship.detail', internship_id=s.internship.id) }}" class="btn btn-outline-c w-100 mt-auto">View Details</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card-surface empty-state"><i class="fa-regular fa-bookmark"></i>
+  <h4 class="h4">No saved internships</h4>
+  <p class="text-muted-sm">Save internships while browsing to view them here later.</p>
+  <a href="{{ url_for('internship.browse') }}" class="btn btn-primary-c mt-2">Browse Internships</a>
+</div>
+{% endif %}
+{% endblock %}

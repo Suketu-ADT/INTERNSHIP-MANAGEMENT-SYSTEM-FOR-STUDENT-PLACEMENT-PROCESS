@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% block title %}Dashboard — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Welcome, {{ company.company_name }}</h1><p class="text-muted-sm">Manage your internship postings and applicants.</p></div>
+  {% if company.is_approved %}
+    <a href="{{ url_for('company.new_internship') }}" class="btn btn-primary-c"><i class="fa-solid fa-circle-plus me-1"></i> Post New Internship</a>
+  {% else %}
+    <span class="pill pill-amber">Pending Admin Approval</span>
+  {% endif %}
+</div>
+
+{% if not company.is_approved %}
+<div class="card-surface card-pad mb-4" style="border-left:4px solid var(--color-warning);">
+  <i class="fa-solid fa-hourglass-half me-1" style="color:var(--color-warning);"></i>
+  Your company account is awaiting approval from the placement office. You'll be able to post internships once approved.
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Active Posts</div><div class="stat-value">{{ active_posts }}</div></div>
+      <div class="stat-icon stat-icon-blue"><i class="fa-solid fa-briefcase"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Total Applicants</div><div class="stat-value">{{ total_applicants }}</div></div>
+      <div class="stat-icon stat-icon-navy"><i class="fa-solid fa-users"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Shortlisted</div><div class="stat-value">{{ shortlisted }}</div></div>
+      <div class="stat-icon stat-icon-amber"><i class="fa-solid fa-star"></i></div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card-surface stat-card d-flex justify-content-between align-items-start">
+      <div><div class="stat-label">Selected</div><div class="stat-value">{{ selected }}</div></div>
+      <div class="stat-icon stat-icon-green"><i class="fa-solid fa-circle-check"></i></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Recent Postings</h3><a href="{{ url_for('company.my_internships') }}" class="text-muted-sm">View all</a></div>
+      {% if recent_posts %}
+        {% for p in recent_posts %}
+        <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+          <div><div style="font-weight:500;">{{ p.title }}</div><div class="text-muted-sm">{{ p.posted_at|time_ago }}</div></div>
+          {{ pill(p.status) }}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-briefcase"></i><p class="text-muted-sm mb-0">No postings yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Recent Applications</h3></div>
+      {% if recent_applications %}
+        {% for a in recent_applications %}
+        <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+          <div><a href="{{ url_for('application.detail', application_id=a.id) }}" style="font-weight:500; color:var(--color-text);">{{ a.student_profile.full_name }}</a><div class="text-muted-sm">{{ a.internship.title }}</div></div>
+          {{ pill(a.status) }}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-users"></i><p class="text-muted-sm mb-0">No applications yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

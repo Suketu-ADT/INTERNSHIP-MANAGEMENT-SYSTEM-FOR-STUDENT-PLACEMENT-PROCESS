@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.full_name }} — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">{{ profile.full_name }}</h1><p class="text-muted-sm">{{ profile.branch }} · {{ profile.location or 'Location not set' }}</p></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-surface card-pad mb-3">
+      <h3 class="h4 mb-2">About</h3>
+      <p class="text-muted-sm">{{ profile.bio or 'No bio provided.' }}</p>
+    </div>
+    <div class="card-surface card-pad">
+      <h3 class="h4 mb-2">Skills</h3>
+      <div class="d-flex flex-wrap gap-1">
+        {% for s in profile.skills %}<span class="pill pill-blue">{{ s.skill_name }}</span>{% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-3">Academics</h4>
+      {% if profile.academic_details %}
+        <div class="kv-row"><span class="k">Degree</span><span>{{ profile.academic_details.degree }}</span></div>
+        <div class="kv-row"><span class="k">CGPA</span><span>{{ profile.academic_details.cgpa }}</span></div>
+        <div class="kv-row"><span class="k">Institution</span><span>{{ profile.academic_details.institution }}</span></div>
+      {% else %}
+        <p class="text-muted-sm">No academic details on file.</p>
+      {% endif %}
+    </div>
+    {% if submitted_resume %}
+    <div class="card-surface card-pad mt-3">
+      <h4 class="h4 mb-3">Resume</h4>
+      <p class="text-muted-sm" style="font-size:12px;">The resume submitted with their application to you.</p>
+      <a href="{{ url_for('application.download_resume', resume_id=submitted_resume.id) }}" target="_blank" class="btn btn-outline-c w-100">
+        <i class="fa-solid fa-file-pdf me-1"></i> {{ submitted_resume.original_filename }}
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

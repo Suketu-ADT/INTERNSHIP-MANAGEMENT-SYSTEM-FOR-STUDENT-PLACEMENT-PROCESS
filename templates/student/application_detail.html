@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}Application Detail — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('application.mine') }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to applications</a>
+    <h1 class="h1 mt-1">{{ application.internship.title }}</h1>
+    <p class="text-muted-sm">{{ application.internship.company.company_name }}</p>
+  </div>
+  <div class="d-flex gap-2 align-items-start">
+    {{ pill(application.status) }}
+    {% if can_withdraw_now %}
+    <form method="POST" action="{{ url_for('application.withdraw', application_id=application.id) }}"
+          data-confirm="Withdraw this application? You won't be able to undo this."
+          data-confirm-label="Withdraw" data-confirm-variant="danger">
+      {{ csrf_field() }}
+      <button class="btn btn-outline-c btn-sm-c">Withdraw</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if can_respond_offer %}
+<div class="card-surface card-pad mb-3" style="border-left:4px solid var(--color-success);">
+  <strong>You have an offer for this internship.</strong>
+  <p class="text-muted-sm mb-2">Accept to confirm your placement, or decline if you no longer wish to proceed.</p>
+  <div class="d-flex gap-2">
+    <form method="POST" action="{{ url_for('application.accept_offer', application_id=application.id) }}"
+          data-confirm="Accept this offer? This confirms your placement for this internship."
+          data-confirm-label="Accept Offer">
+      {{ csrf_field() }}
+      <button class="btn btn-success-c">Accept Offer</button>
+    </form>
+    <form method="POST" action="{{ url_for('application.decline_offer', application_id=application.id) }}"
+          data-confirm="Decline this offer? This cannot be undone."
+          data-confirm-label="Decline Offer" data-confirm-variant="danger">
+      {{ csrf_field() }}
+      <button class="btn btn-outline-c">Decline Offer</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Application Timeline</h3></div>
+      <div class="card-pad">
+        {% for h in history %}
+        <div class="d-flex gap-3 mb-3">
+          <div class="stat-icon stat-icon-blue" style="width:30px;height:30px;flex-shrink:0;"><i class="fa-solid fa-circle-dot" style="font-size:10px;"></i></div>
+          <div>
+            {{ pill(h.status) }}
+            <div class="text-muted-sm mt-1">{{ h.changed_at.strftime('%d %b %Y, %I:%M %p') }} · by {{ h.changed_by|title }}</div>
+            {% if h.notes %}<div class="text-muted-sm mt-1">{{ h.notes }}</div>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    {% set active_interview = application.interviews.filter_by(status='scheduled').first() %}
+    {% if active_interview %}
+    <div class="card-surface card-pad mb-3">
+      <h4 class="h4 mb-3"><i class="fa-solid fa-calendar-check me-1"></i> Upcoming Interview</h4>
+      <div class="kv-row"><span class="k">Date &amp; Time</span><span>{{ active_interview.scheduled_at.strftime('%d %b %Y, %I:%M %p') }}</span></div>
+      <div class="kv-row"><span class="k">Mode</span><span>{{ active_interview.mode|title }}</span></div>
+      {% if active_interview.location_or_link %}
+      <div class="kv-row"><span class="k">Location / Link</span><span>{{ active_interview.location_or_link }}</span></div>
+      {% endif %}
+      {% if active_interview.notes %}
+      <div class="kv-row"><span class="k">Notes</span><span>{{ active_interview.notes }}</span></div>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div class="card-surface card-pad">
+      <h4 class="h4 mb-3">Internship</h4>
+      <div class="kv-row"><span class="k">Domain</span><span>{{ application.internship.domain }}</span></div>
+      <div class="kv-row"><span class="k">Location</span><span>{{ application.internship.location }}</span></div>
+      <div class="kv-row"><span class="k">Work Mode</span><span>{{ application.internship.work_mode|title }}</span></div>
+      <a href="{{ url_for('internship.detail', internship_id=application.internship.id) }}" class="btn btn-outline-c w-100 mt-3">View Internship</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

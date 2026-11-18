@@ -1,0 +1,157 @@
+/* ===========================================================
+   Landing page only - loaded by templates/index.html alone, so it never
+   affects the authenticated dashboard styling in style.css. Uses the same
+   design tokens (navy/white, --color-* vars from style.css) deliberately:
+   no extra gradients, blur/glassmorphism, or motion beyond a 0.15s hover.
+   =========================================================== */
+
+.landing { background: var(--color-bg); }
+
+/* Navbar ---------------------------------------------------- */
+.landing-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+.landing-nav-inner {
+  max-width: 1160px; margin: 0 auto; padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.landing-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--color-primary); font-size: 17px; }
+.landing-nav-links { display: flex; align-items: center; gap: 28px; }
+.landing-nav-links a { color: var(--color-text); font-size: 13.5px; font-weight: 500; }
+.landing-nav-links a:hover { color: var(--color-secondary); }
+.landing-nav-actions { display: flex; align-items: center; gap: 10px; }
+.landing-nav-toggle { display: none; background: none; border: none; font-size: 20px; color: var(--color-primary); }
+
+@media (max-width: 860px) {
+  .landing-nav-links { display: none; }
+  .landing-nav-toggle { display: inline-flex; }
+  .landing-nav-inner.show .landing-nav-links {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+    position: absolute; top: 56px; left: 0; right: 0; background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border); padding: 16px 24px;
+  }
+}
+
+/* Hero -------------------------------------------------------- */
+.landing-hero {
+  max-width: 1160px; margin: 0 auto; padding: 72px 24px 56px;
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center;
+}
+.landing-hero h1 { font-size: 38px; line-height: 1.2; font-weight: 700; color: var(--color-primary); margin-bottom: 16px; }
+.landing-hero p.lead { color: var(--color-text-secondary); font-size: 16px; margin-bottom: 28px; max-width: 480px; }
+.landing-hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.landing-mockup {
+  background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-md); overflow: hidden;
+}
+.landing-mockup-bar { display: flex; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--color-border); }
+.landing-mockup-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-border); }
+.landing-mockup-body { padding: 18px; }
+.landing-mockup-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.landing-mockup-stat { background: var(--color-bg); border-radius: var(--radius-sm); padding: 10px; }
+.landing-mockup-stat .n { font-weight: 700; font-size: 16px; color: var(--color-primary); }
+.landing-mockup-stat .l { font-size: 10.5px; color: var(--color-text-secondary); }
+.landing-mockup-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-top: 1px solid var(--color-border); font-size: 12.5px;
+}
+.landing-mockup-row:first-of-type { border-top: none; }
+.landing-mockup-caption { text-align: center; font-size: 11px; color: var(--color-text-secondary); padding: 8px 0 14px; }
+
+@media (max-width: 860px) {
+  .landing-hero { grid-template-columns: 1fr; padding-top: 40px; }
+  .landing-hero h1 { font-size: 30px; }
+}
+
+/* Generic section shell --------------------------------------- */
+.landing-section { max-width: 1160px; margin: 0 auto; padding: 56px 24px; }
+.landing-section-alt { background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); }
+.landing-section-head { text-align: center; max-width: 620px; margin: 0 auto 36px; }
+.landing-section-head h2 { font-size: 26px; color: var(--color-primary); margin-bottom: 8px; }
+.landing-section-head p { color: var(--color-text-secondary); font-size: 14.5px; }
+
+/* Stats --------------------------------------------------------- */
+.landing-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.landing-stat { text-align: center; padding: 20px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.landing-stat .n { font-size: 28px; font-weight: 700; color: var(--color-primary); }
+.landing-stat .l { font-size: 12.5px; color: var(--color-text-secondary); margin-top: 4px; }
+@media (max-width: 760px) { .landing-stats { grid-template-columns: repeat(2, 1fr); } }
+
+/* Companies grid ------------------------------------------------ */
+.landing-companies-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.landing-company-card {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+  padding: 18px; text-align: center; transition: box-shadow 0.15s ease;
+}
+.landing-company-card:hover { box-shadow: var(--shadow-sm); }
+@media (max-width: 760px) { .landing-companies-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Internship cards ------------------------------------------------ */
+.landing-internships-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.landing-internship-card {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: 18px; display: flex; flex-direction: column; gap: 8px;
+}
+@media (max-width: 860px) { .landing-internships-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .landing-internships-grid { grid-template-columns: 1fr; } }
+
+/* How it works ------------------------------------------------- */
+.landing-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.landing-step { text-align: center; padding: 8px; }
+.landing-step .step-num {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 12px;
+}
+.landing-step h4 { font-size: 14.5px; margin-bottom: 6px; }
+.landing-step p { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+@media (max-width: 760px) { .landing-steps { grid-template-columns: 1fr 1fr; } }
+
+/* AI features ----------------------------------------------------- */
+.landing-ai-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.landing-ai-card {
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: 20px;
+}
+.landing-ai-card i { font-size: 20px; color: var(--color-secondary); margin-bottom: 10px; display: block; }
+.landing-ai-card h4 { font-size: 14px; margin-bottom: 6px; }
+.landing-ai-card p { font-size: 12.5px; color: var(--color-text-secondary); margin: 0; }
+@media (max-width: 860px) { .landing-ai-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Benefits ------------------------------------------------------- */
+.landing-benefits { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.landing-benefit-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 24px; }
+.landing-benefit-card h3 { color: var(--color-primary); margin-bottom: 14px; }
+.landing-benefit-card ul { list-style: none; margin: 0; padding: 0; }
+.landing-benefit-card li { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--color-text); padding: 7px 0; }
+.landing-benefit-card li i { color: var(--color-success); margin-top: 2px; }
+@media (max-width: 760px) { .landing-benefits { grid-template-columns: 1fr; } }
+
+/* Final CTA -------------------------------------------------------- */
+.landing-cta {
+  max-width: 1160px; margin: 0 auto; padding: 48px 24px; text-align: center;
+  background: var(--color-primary); border-radius: var(--radius-lg);
+}
+.landing-cta h2 { color: #fff; font-size: 24px; margin-bottom: 10px; }
+.landing-cta p { color: rgba(255,255,255,0.78); margin-bottom: 20px; }
+.landing-cta .btn-primary-c { background: #fff; color: var(--color-primary); border-color: #fff; }
+.landing-cta .btn-primary-c:hover { background: #F1F5F9; }
+.landing-cta .btn-outline-c { background: transparent; color: #fff; border-color: rgba(255,255,255,0.4); }
+.landing-cta .btn-outline-c:hover { background: rgba(255,255,255,0.08); }
+
+/* Footer -------------------------------------------------------------- */
+.landing-footer { background: var(--color-primary); color: rgba(255,255,255,0.72); padding: 48px 24px 24px; margin-top: 56px; }
+.landing-footer-inner { max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px; }
+.landing-footer h5 { color: #fff; font-size: 13px; margin-bottom: 14px; }
+.landing-footer-brand { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 700; margin-bottom: 10px; }
+.landing-footer ul { list-style: none; padding: 0; margin: 0; }
+.landing-footer li { margin-bottom: 8px; font-size: 13px; }
+.landing-footer a { color: rgba(255,255,255,0.72); }
+.landing-footer a:hover { color: #fff; }
+.landing-footer-bottom {
+  max-width: 1160px; margin: 32px auto 0; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 12px; color: rgba(255,255,255,0.55); text-align: center;
+}
+@media (max-width: 760px) { .landing-footer-inner { grid-template-columns: 1fr 1fr; } }

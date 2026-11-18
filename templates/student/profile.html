@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "partials/form_field.html" import field %}
+{% block title %}My Profile — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">My Profile</h1><p class="text-muted-sm">Keep your information up to date so recruiters see you at your best.</p></div>
+</div>
+
+<ul class="nav mb-3" style="gap:4px;">
+  <li><a class="btn btn-primary-c btn-sm-c" href="{{ url_for('student.profile') }}">Profile</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.academic') }}">Academic Details</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.skills') }}">Skills</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.resume') }}">Resume</a></li>
+</ul>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-surface card-pad">
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="row">
+          <div class="col-md-6">{{ field(form.full_name) }}</div>
+          <div class="col-md-6">{{ field(form.phone) }}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{{ field(form.branch) }}</div>
+          <div class="col-md-6">{{ field(form.year_of_study) }}</div>
+        </div>
+        {{ field(form.location) }}
+        {{ field(form.bio) }}
+        <div class="mb-3">
+          <label class="form-label">{{ form.profile_photo.label.text }}</label>
+          {{ form.profile_photo(class="form-control") }}
+        </div>
+        <button type="submit" class="btn btn-primary-c">Save Changes</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-surface card-pad text-center">
+      {% if profile.profile_photo %}
+        <img src="{{ url_for('static', filename='uploads/logos/' + profile.profile_photo) }}" class="rounded-circle mb-3" style="width:88px;height:88px;object-fit:cover;">
+      {% else %}
+        <div class="avatar-circle mx-auto mb-3" style="width:88px;height:88px;font-size:28px;">{{ profile.full_name[:1]|upper }}</div>
+      {% endif %}
+      <div style="font-weight:600;">{{ profile.full_name }}</div>
+      <div class="text-muted-sm">{{ profile.branch }} · Year {{ profile.year_of_study }}</div>
+      <div class="progress-track mt-3 mb-1"><div class="progress-fill" style="width:{{ profile.profile_completion() }}%;"></div></div>
+      <div class="text-muted-sm">{{ profile.profile_completion() }}% profile complete</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

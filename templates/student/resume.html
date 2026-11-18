@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}Resume — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Resume</h1><p class="text-muted-sm">Upload a PDF or DOCX resume. Your most recent upload is used for applications and AI analysis.</p></div>
+</div>
+<ul class="nav mb-3" style="gap:4px;">
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.profile') }}">Profile</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.academic') }}">Academic Details</a></li>
+  <li><a class="btn btn-outline-c btn-sm-c" href="{{ url_for('student.skills') }}">Skills</a></li>
+  <li><a class="btn btn-primary-c btn-sm-c" href="{{ url_for('student.resume') }}">Resume</a></li>
+</ul>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card-surface card-pad">
+      <h3 class="h4 mb-3">Upload Resume</h3>
+      <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+          {{ form.resume_file(class="form-control") }}
+          {% if form.resume_file.errors %}<div class="text-danger small mt-1">{{ form.resume_file.errors[0] }}</div>{% endif %}
+          <div class="text-muted-sm mt-1">PDF or DOCX, max 5MB.</div>
+        </div>
+        <button type="submit" class="btn btn-primary-c w-100">Upload Resume</button>
+      </form>
+      <div class="text-muted-sm mt-3" style="font-size:12px; border-top:1px solid var(--color-border); padding-top:12px;">
+        <i class="fa-solid fa-shield-halved me-1"></i>
+        If you use the AI Resume Analyzer or AI Match on an internship, this resume's extracted text is sent to
+        Groq's API (a third-party AI provider) for that analysis only. It is not sent anywhere else, and
+        recruiters never see your raw resume text through the AI — only the file itself, when you apply.
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card-surface">
+      <div class="card-header-row"><h3 class="h4">Uploaded Resumes</h3></div>
+      {% if resumes %}
+        {% for r in resumes %}
+          <div class="d-flex justify-content-between align-items-center card-pad border-top-c" style="{{ 'border-top:none;' if loop.first }}">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-icon stat-icon-navy"><i class="fa-solid fa-file-pdf"></i></div>
+              <div>
+                <div style="font-weight:500;">{{ r.original_filename }}{% if loop.first %} <span class="pill pill-green ms-1">Active</span>{% endif %}</div>
+                <div class="text-muted-sm">{{ r.uploaded_at|time_ago }} · {{ (r.file_size / 1024)|round(1) }} KB</div>
+              </div>
+            </div>
+            <div class="d-flex gap-1">
+              <a href="{{ url_for('application.download_resume', resume_id=r.id) }}" target="_blank" class="btn btn-ghost-c btn-sm-c" title="View"><i class="fa-solid fa-eye"></i></a>
+              <form method="POST" action="{{ url_for('student.delete_resume', resume_id=r.id) }}">
+                {{ csrf_field() }}
+                <button class="btn btn-ghost-c btn-sm-c" title="Delete"><i class="fa-solid fa-trash"></i></button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state"><i class="fa-solid fa-file-waveform"></i><p class="text-muted-sm mb-0">No resumes uploaded yet.</p></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

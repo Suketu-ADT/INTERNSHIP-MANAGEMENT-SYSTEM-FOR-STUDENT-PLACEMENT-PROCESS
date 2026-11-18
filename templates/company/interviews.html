@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Interviews — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1 class="h1">Interviews</h1><p class="text-muted-sm">Upcoming interviews across all your internship posts.</p></div>
+</div>
+<div class="card-surface">
+  {% if interviews %}
+  <div class="table-responsive-wrap">
+  <table class="table-clean">
+    <thead><tr><th>Candidate</th><th>Internship</th><th>Date/Time</th><th>Mode</th><th>Location/Link</th><th></th></tr></thead>
+    <tbody>
+      {% for iv in interviews %}
+      <tr>
+        <td>{{ iv.application.student_profile.full_name }}</td>
+        <td>{{ iv.application.internship.title }}</td>
+        <td>{{ iv.scheduled_at.strftime('%d %b %Y, %I:%M %p') }}</td>
+        <td><span class="pill pill-navy">{{ iv.mode|title }}</span></td>
+        <td class="text-muted-sm">{{ iv.location_or_link or '—' }}</td>
+        <td><a href="{{ url_for('application.detail', application_id=iv.application.id) }}" class="btn btn-outline-c btn-sm-c">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <div class="empty-state"><i class="fa-regular fa-calendar"></i><h4 class="h4">No interviews scheduled</h4></div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "partials/status_pill.html" import pill %}
+{% from "partials/csrf_field.html" import field as csrf_field %}
+{% block title %}{{ internship.title }} — IMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <a href="{{ url_for('admin.internships') }}" class="text-muted-sm"><i class="fa-solid fa-arrow-left me-1"></i> Back to internships</a>
+    <h1 class="h1 mt-1">{{ internship.title }}</h1>
+    <p class="text-muted-sm">{{ internship.company.company_name }} · {{ pill(internship.status) }}</p>
+  </div>
+  {% if internship.status == 'pending_approval' %}
+  <div class="d-flex gap-2">
+    <form method="POST" action="{{ url_for('admin.approve_internship', internship_id=internship.id) }}">{{ csrf_field() }}<button class="btn btn-success-c">Approve</button></form>
+    <form method="POST" action="{{ url_for('admin.reject_internship', internship_id=internship.id) }}" data-confirm="Reject this internship posting?" data-confirm-label="Reject" data-confirm-variant="danger">{{ csrf_field() }}<button class="btn btn-danger-c">Reject</button></form>
+  </div>
+  {% endif %}
+</div>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card-surface card-pad">
+      <h3 class="h4 mb-2">Description</h3>
+      <p style="white-space:pre-wrap;">{{ internship.description }}</p>
+      <h4 class="h4 mt-3 mb-2">Required Skills</h4>
+      <div class="d-flex flex-wrap gap-1">{% for s in internship.skills_list() %}<span class="pill pill-blue">{{ s }}</span>{% endfor %}</div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-surface card-pad">
+      <div class="kv-row"><span class="k">Domain</span><span>{{ internship.domain }}</span></div>
+      <div class="kv-row"><span class="k">Location</span><span>{{ internship.location }}</span></div>
+      <div class="kv-row"><span class="k">Stipend</span><span>₹{{ internship.stipend }}</span></div>
+      <div class="kv-row"><span class="k">Openings</span><span>{{ internship.openings }}</span></div>
+      <div class="kv-row"><span class="k">Applicants</span><span>{{ internship.applications.count() }}</span></div>
+      {% if internship.eligibility %}
+      <div class="kv-row"><span class="k">Min CGPA</span><span>{{ internship.eligibility.min_cgpa }}</span></div>
+      <div class="kv-row"><span class="k">Branches</span><span>{{ internship.eligibility.eligible_branches or 'All' }}</span></div>
+      <div class="kv-row"><span class="k">Min. Year</span><span>{{ (internship.eligibility.min_year ~ ' Year') if internship.eligibility.min_year else 'Any' }}</span></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

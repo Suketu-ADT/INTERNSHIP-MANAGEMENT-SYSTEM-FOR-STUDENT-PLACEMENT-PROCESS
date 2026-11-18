@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "partials/form_field.html" import field %}
+{% block title %}Log In — IMS{% endblock %}
+{% block guest_content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo"><i class="fa-solid fa-graduation-cap"></i><span>IMS Portal</span></div>
+    <h2 class="h2 mb-1">Welcome back</h2>
+    <p class="text-secondary2 mb-4">Log in to continue to your dashboard.</p>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      {{ field(form.email) }}
+      {{ field(form.password) }}
+      <button type="submit" class="btn btn-primary-c w-100 py-2 mt-2">Log In</button>
+    </form>
+    <p class="text-center text-secondary2 mt-4" style="font-size:13px;">
+      Don't have an account?
+      <a href="{{ url_for('auth.register_student') }}">Register as Student</a> ·
+      <a href="{{ url_for('auth.register_company') }}">Register as Company</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
